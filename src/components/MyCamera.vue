@@ -66,6 +66,11 @@ export default {
         photo.value = canvas.value.toDataURL("image/png");
 
         saveToLocalStorage(photo.value);
+
+        if ("vibrate" in navigator) {
+          navigator.vibrate(200); // 📳 Vibration de 200ms
+        }
+        
         showPopup.value = true;
       }
     };
