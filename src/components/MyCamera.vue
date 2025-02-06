@@ -1,13 +1,14 @@
 <template>
   <div>
     <video ref="video" autoplay></video>
-    <button @click="takePhoto">Prendre une photo</button>
+    <button @click="takePhoto">📸 Prendre une photo</button>
     <canvas ref="canvas" style="display: none"></canvas>
     <img v-if="photo" :src="photo" alt="Captured image" />
 
     <p v-if="location">📍 {{ location }}</p>
     <p v-else>📍 Lieu inconnu</p>
 
+    <!-- 📌 POPUP -->
     <div v-if="showPopup" class="popup">
       <div class="popup-content">
         <h3>📸 Photo enregistrée !</h3>
@@ -15,6 +16,17 @@
         <p>📍 {{ location }}</p>
         <button @click="closePopup">OK</button>
       </div>
+    </div>
+
+    <!-- 🖼️ GALERIE DES PHOTOS ENREGISTRÉES -->
+    <div v-if="gallery.length" class="gallery">
+      <h3>🖼️ Galerie</h3>
+      <div class="gallery-container">
+        <div v-for="(img, index) in gallery" :key="index" class="gallery-item">
+          <img :src="img" alt="Gallery Image" />
+        </div>
+      </div>
+      <button @click="clearGallery" class="delete-btn">🗑️ Vider la galerie</button>
     </div>
   </div>
 </template>
@@ -29,6 +41,7 @@ export default {
     const photo = ref(null);
     const showPopup = ref(false);
     const location = ref("Lieu inconnu");
+    const gallery = ref([]);
 
     onMounted(() => {
       navigator.mediaDevices
@@ -41,6 +54,7 @@ export default {
         .catch((error) => console.error("Erreur d'accès à la caméra :", error));
 
       getLocation();
+      loadGallery(); // 🔄 Charger les photos enregistrées
     });
 
     const takePhoto = () => {
@@ -51,7 +65,7 @@ export default {
         context.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height);
         photo.value = canvas.value.toDataURL("image/png");
 
-        downloadImage(photo.value);
+        saveToLocalStorage(photo.value);
         showPopup.value = true;
       }
     };
@@ -60,13 +74,20 @@ export default {
       showPopup.value = false;
     };
 
-    const downloadImage = (imageSrc) => {
-      const link = document.createElement("a");
-      link.href = imageSrc;
-      link.download = `photo_${Date.now()}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    const saveToLocalStorage = (image) => {
+      const savedImages = JSON.parse(localStorage.getItem("photoGallery")) || [];
+      savedImages.push(image);
+      localStorage.setItem("photoGallery", JSON.stringify(savedImages));
+      loadGallery(); // 🔄 Mettre à jour la galerie
+    };
+
+    const loadGallery = () => {
+      gallery.value = JSON.parse(localStorage.getItem("photoGallery")) || [];
+    };
+
+    const clearGallery = () => {
+      localStorage.removeItem("photoGallery");
+      gallery.value = [];
     };
 
     const getLocation = () => {
@@ -93,7 +114,7 @@ export default {
       }
     };
 
-    return { video, canvas, photo, takePhoto, showPopup, closePopup, location };
+    return { video, canvas, photo, takePhoto, showPopup, closePopup, location, gallery, clearGallery };
   },
 };
 </script>
@@ -145,6 +166,37 @@ button {
   margin-top: 10px;
   padding: 10px;
   background-color: #42b983;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+/* 🖼️ Galerie */
+.gallery {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.gallery-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.gallery-item img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 2px solid #42b983;
+}
+
+.delete-btn {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #ff4d4d;
   color: white;
   border: none;
   cursor: pointer;

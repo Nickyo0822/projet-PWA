@@ -1,15 +1,17 @@
 <template>
   <MyCamera/>
+  <MyCalls/>
 </template>
 
 <script>
+  import MyCalls from './components/MyCalls.vue';
   import MyCamera from './components/MyCamera.vue';
 
   export default {
     name: 'App',
     components: {
-      // HelloWorld,
-      MyCamera
+      MyCamera,
+      MyCalls
     }
   }
 </script>
