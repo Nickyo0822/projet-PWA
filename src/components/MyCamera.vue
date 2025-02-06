@@ -1,24 +1,18 @@
 <template>
   <div>
     <video ref="video" autoplay></video>
-    <button @click="takePhoto">📸 Prendre une photo</button>
+
+    <!-- Bouton centré -->
+    <div class="button-container">
+      <button @click="takePhoto">📸 Prendre une photo</button>
+    </div>
+
     <canvas ref="canvas" style="display: none"></canvas>
-    <img v-if="photo" :src="photo" alt="Captured image" />
 
     <p v-if="location">📍 {{ location }}</p>
     <p v-else>📍 Lieu inconnu</p>
 
-    <!-- 📌 POPUP -->
-    <div v-if="showPopup" class="popup">
-      <div class="popup-content">
-        <h3>📸 Photo enregistrée !</h3>
-        <img :src="photo" alt="Captured photo" />
-        <p>📍 {{ location }}</p>
-        <button @click="closePopup">OK</button>
-      </div>
-    </div>
-
-    <!-- 🖼️ GALERIE DES PHOTOS ENREGISTRÉES -->
+    <!-- 🖼️ Galerie des photos enregistrées -->
     <div v-if="gallery.length" class="gallery">
       <h3>🖼️ Galerie</h3>
       <div class="gallery-container">
@@ -39,7 +33,6 @@ export default {
     const video = ref(null);
     const canvas = ref(null);
     const photo = ref(null);
-    const showPopup = ref(false);
     const location = ref("Lieu inconnu");
     const gallery = ref([]);
 
@@ -66,15 +59,9 @@ export default {
         photo.value = canvas.value.toDataURL("image/png");
 
         saveToLocalStorage(photo.value);
-
         navigator.vibrate(200);
-
-        showPopup.value = true;
+        sendNotification(); // 🔔 Envoi de la notification
       }
-    };
-
-    const closePopup = () => {
-      showPopup.value = false;
     };
 
     const saveToLocalStorage = (image) => {
@@ -91,6 +78,29 @@ export default {
     const clearGallery = () => {
       localStorage.removeItem("photoGallery");
       gallery.value = [];
+    };
+
+    const sendNotification = () => {
+      if (!("Notification" in window)) {
+        console.warn("Les notifications ne sont pas supportées.");
+        return;
+      }
+
+      if (Notification.permission === "granted") {
+        new Notification("📸 Photo enregistrée !", {
+          body: `📍 ${location.value}`,
+          icon: photo.value,
+        });
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then((permission) => {
+          if (permission === "granted") {
+            new Notification("📸 Photo enregistrée !", {
+              body: `📍 ${location.value}`,
+              icon: photo.value,
+            });
+          }
+        });
+      }
     };
 
     const getLocation = () => {
@@ -117,7 +127,7 @@ export default {
       }
     };
 
-    return { video, canvas, photo, takePhoto, showPopup, closePopup, location, gallery, clearGallery };
+    return { video, canvas, photo, takePhoto, location, gallery, clearGallery };
   },
 };
 </script>
@@ -128,51 +138,32 @@ video {
   max-width: 400px;
   border: 2px solid #42b983;
   border-radius: 5px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Centrage du bouton */
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
 }
 
 button {
-  margin-top: 10px;
-  padding: 10px;
+  padding: 14px 24px;
+  font-size: 18px;
   background-color: #42b983;
   color: white;
   border: none;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.popup-content {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-}
-
-.popup-content img {
-  max-width: 100%;
-  margin-top: 10px;
-  border-radius: 5px;
-}
-
-.popup-content button {
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
+button:active {
+  transform: scale(0.95);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* 🖼️ Galerie */
@@ -198,11 +189,16 @@ button {
 
 .delete-btn {
   margin-top: 10px;
-  padding: 10px;
+  padding: 12px 20px;
   background-color: #ff4d4d;
   color: white;
   border: none;
   cursor: pointer;
   border-radius: 5px;
+  font-size: 16px;
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
 }
 </style>
