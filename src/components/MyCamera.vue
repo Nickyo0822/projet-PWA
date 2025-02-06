@@ -67,10 +67,8 @@ export default {
 
         saveToLocalStorage(photo.value);
 
-        if ("vibrate" in navigator) {
-          navigator.vibrate(200); // 📳 Vibration de 200ms
-        }
-        
+        navigator.vibrate(200);
+
         showPopup.value = true;
       }
     };
