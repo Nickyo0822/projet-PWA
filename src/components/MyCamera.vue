@@ -134,8 +134,7 @@ export default {
 
 <style scoped>
 video {
-  width: 100%;
-  max-width: 400px;
+  width: 40%;
   border: 2px solid #42b983;
   border-radius: 5px;
   display: block;
@@ -149,9 +148,14 @@ video {
   margin-top: 15px;
 }
 
+p {
+  padding: 0;
+  margin: 20px 0 0 0;
+}
+
 button {
-  padding: 14px 24px;
-  font-size: 18px;
+  padding: 7px 12px;
+  font-size: 9px;
   background-color: #42b983;
   color: white;
   border: none;
