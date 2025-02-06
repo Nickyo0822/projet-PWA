@@ -1,14 +1,14 @@
 <template>
     <div class="battery-container">
       <h2>🔋 Niveau de Batterie</h2>
-      <p v-if="batteryLevel !== null">⚡ {{ batteryLevel }}%</p>
+      <p :class="batteryClass">{{ batteryLevel }}%</p>
       <p v-if="charging">🔌 En charge...</p>
       <p v-else>🔋 Non branché</p>
     </div>
   </template>
   
   <script>
-  import { ref, onMounted } from "vue";
+  import { ref, computed, onMounted } from "vue";
   
   export default {
     setup() {
@@ -20,13 +20,18 @@
         charging.value = battery.charging;
       };
   
+      const batteryClass = computed(() => {
+        if (batteryLevel.value > 50) return "battery-green";
+        if (batteryLevel.value > 20) return "battery-orange";
+        return "battery-red";
+      });
+  
       onMounted(async () => {
         if ("getBattery" in navigator) {
           try {
             const battery = await navigator.getBattery();
             updateBatteryStatus(battery);
   
-            // 🔄 Écoute des changements de batterie
             battery.addEventListener("levelchange", () => updateBatteryStatus(battery));
             battery.addEventListener("chargingchange", () => updateBatteryStatus(battery));
           } catch (error) {
@@ -37,7 +42,7 @@
         }
       });
   
-      return { batteryLevel, charging };
+      return { batteryLevel, charging, batteryClass };
     },
   };
   </script>
@@ -51,8 +56,27 @@
     width: 200px;
     margin: auto;
   }
+  
   h2 {
     color: #42b983;
+  }
+  
+  p {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  /* 🎨 Couleurs dynamiques */
+  .battery-green {
+    color: #2ecc71; /* Vert */
+  }
+  
+  .battery-orange {
+    color: #f39c12; /* Orange */
+  }
+  
+  .battery-red {
+    color: #e74c3c; /* Rouge */
   }
   </style>
   
