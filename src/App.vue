@@ -1,9 +1,11 @@
 <template>
   <MyCamera/>
   <MyCalls/>
+  <MyBattery/>
 </template>
 
 <script>
+  import MyBattery from './components/MyBattery.vue';
   import MyCalls from './components/MyCalls.vue';
   import MyCamera from './components/MyCamera.vue';
 
@@ -11,7 +13,8 @@
     name: 'App',
     components: {
       MyCamera,
-      MyCalls
+      MyCalls,
+      MyBattery
     }
   }
 </script>
