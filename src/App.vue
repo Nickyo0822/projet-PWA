@@ -43,7 +43,7 @@ export default {
   },
   data() {
     return {
-      currentComponent: 'MyCamera' // Composant affiché par défaut
+      currentComponent: 'MyCamera'
     };
   }
 };
